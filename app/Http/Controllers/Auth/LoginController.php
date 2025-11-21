@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -14,6 +15,7 @@ class LoginController extends Controller
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required|password',
+            'password' => 'required|string',
         ]);
 
         $user = User::where('email', $validated['email'])->first();

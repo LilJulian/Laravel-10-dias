@@ -1,44 +1,64 @@
 <?php
-
+// ...existing code...
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 
 class UsuarioController extends Controller
 {
     public function index()
     {
-        return $usuarios = Usuario::all();
-    }   
+        return User::all();
+    }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre' => 'required|string',
-            'email' => 'required|email|unique:usuarios,email',
-            'password' => 'required|string|min:6|password'
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email',
+            // validar que tenga al menos un número:
+            'password' => 'required|string|min:6|regex:/[0-9]/',
         ]);
 
-        return Usuario::create($validated);
+        $validated['password'] = bcrypt($validated['password']);
+
+        return User::create($validated);
     }
 
     public function show($id)
     {
-        return Usuario::findOrFail($id);
+        return User::findOrFail($id);
     }
 
     public function update(Request $request, $id)
     {
-        $usuario = Usuario::findOrFail($id);
+        $usuario = User::findOrFail($id);
 
         $validated = $request->validate([
-            'nombre' => 'required|string',
-            'email' => 'required|email|unique:usuarios,email,' . $id,
-            'password' => 'required|string|min:6|password',
+            'name' => 'required|string',
+            'email' => 'required|email|unique:users,email,' . $id,
+            // password opcional en update
+            'password' => 'nullable|string|min:6|regex:/[0-9]/',
         ]);
+
+        if (!empty($validated['password'])) {
+            $validated['password'] = bcrypt($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
 
         $usuario->update($validated);
 
         return $usuario;
     }
+
+    public function destroy($id)
+    {
+        $usuario = User::findOrFail($id);
+        $usuario->delete();
+
+        return response()->json(['message' => 'Usuario eliminado']);
+    }
 }
+// ...existing code...
